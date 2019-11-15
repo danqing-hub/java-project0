@@ -1,23 +1,28 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
-	pageEncoding="UTF-8"%>
+	pageEncoding="UTF-8"  isELIgnored="false"%>
+<%--引入标签库--%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 <title>show</title>
-<%
+<%//存入当前项目的名称找
 	pageContext.setAttribute("APP_PATH", request.getContextPath());
 %>
+<%--web路径：
+不以/开始的相对路径，很容易出问题。
+以/开始的路径，以服务器的路径为标准（http://localhost:3306),需要加上项目名
+--%>
 <link rel="stylesheet"
 	href="${APP_PATH}/static/bootstrap-3.3.7-dist/css/bootstrap.min.css"></link>
 <script type="text/javascript"
 	src="${APP_PATH}/static/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
 <script type="text/javascript"
-	src="${APP_PATH}/static/jquery-3.2.1.min.js"></script>
+	src="${APP_PATH}/static/jquery-3.1.1.min.js"></script>
 </head>
 <body>
-	<!-- 搭建显示页面 -->
+	<!-- 搭建显示页面 （bootstrap）-->
 	<div class="container">
 		<!--1.标题  -->
 		<div class="row">
@@ -47,13 +52,13 @@
 						<th>gender</th>
 						<th>email</th>
 						<th>deptName</th>
-						<th>oprate</th>
+						<th> 操作</th>
 					</tr>
 					<c:forEach items="${pageInfo.list}" var="emp">
 						<tr>
 							<th>${emp.empId }</th>
 							<th>${emp.empName }</th>
-							<th>${emp.gender }</th>
+							<th>${emp.gender=="M"?"男":"女" }</th>
 							<th>${emp.email}</th>
 							<th>${emp.department.deptName }</th>
 							<th>
@@ -77,7 +82,7 @@
 			</div>
 			<!-- 分页条信息 -->
 			<div class="col-md-6">
-				<nav aria-label="...">
+				<nav aria-label="page navigation">
 					<ul class="pagination">
 						<li><a href="${APP_PATH}/emps?pn=1">首页</a></li>
 						<!-- 如果是首页则禁止点击前一页 -->
@@ -91,9 +96,10 @@
 						</c:if>
 
 						<!-- 显示连续的页面并使得当前页面为高亮 -->
-						<c:forEach items="${pageInfo.navigatepageNums }" var="pageNum">
+						<c:forEach items="${pageInfo.navigatepageNums }" var="page_Num">
+							<%--判断是不是当前查的页面，如果是高亮，不是就不高亮--%>
 							<c:if test="${pageNum==pageInfo.pageNum }">
-								<li class="active"><a href="#">${pageNum }</a></li>
+								<li class="active"><a href="#">${page_Num }</a></li>
 							</c:if>
 							<c:if test="${pageNum!=pageInfo.pageNum }">
 								<li><a href="${APP_PATH}/emps?pn=${pageNum}">${pageNum }</a></li>

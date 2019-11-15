@@ -9,20 +9,23 @@
 	<!-- spring配置文件，这里主要配置和逻辑有关的 -->
 	<!--数据源，事务控制，xxx -->
 	<!--除了控制器都要扫描 -->
-	<context:component-scan base-package="com.wantao">
-		<context:exclude-filter type="annotation"
+	<context:component-scan base-package="com.wantao.dao"/>
+	<context:component-scan base-package="com.wantao.service"/>
+		<!--<context:exclude-filter type="annotation"
 			expression="org.springframework.stereotype.Controller" />
-	</context:component-scan>
-	<context:property-placeholder location="classpath:jdbc.properties"/>
+	</context:component-scan>-->
+
+<!--	<context:property-placeholder location="classpath:jdbc.properties"/>-->
+	<!--配置数据源-->
 	<bean id="PoolDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
-		<property name="jdbcUrl" value="${jdbc.jdbcUrl}"></property>
-		<property name="driverClass" value="${jdbc.driverClass}"></property>
-		<property name="user" value="${jdbc.user}"></property>
-		<property name="password" value="${jdbc.password}"></property>
+		<property name="jdbcUrl" value="jdbc:mysql://47.94.229.156:3306/ssm_crud?serverTimezone = GMT"></property>
+		<property name="driverClass" value="com.mysql.cj.jdbc.Driver"></property>
+		<property name="user" value="root"></property>
+		<property name="password" value="123456"></property>
 	</bean>
-	<!--配置spring和mabatis的整合 -->
+	<!--=============================配置spring和mabatis的整合============================ -->
 	
-	<bean id="sqlSessionFactoryBean" class="org.mybatis.spring.SqlSessionFactoryBean">
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
 		<!--指定mybatis的全局配置文件 -->
 		<property name="configLocation" value="classpath:mybatis-config.xml"></property>
 		<!--配置数据源 -->
@@ -30,20 +33,25 @@
 		<!--配置mybatis映射文件 -->
 		<property name="mapperLocations" value="classpath:mapper/*.xml"></property>
 	</bean>
-	<!-- 设置扫描器，将mybatis的解口实现类添加到ioc容器中 -->
-	<bean name="mapperScannerConfigurer" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+	<!-- 设置扫描器，将mybatis的接口实现类添加到ioc容器中 -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<!--扫描所有dao接口的实现，加入到IoC容器中-->
 		<property name="basePackage" value="com.wantao.dao"></property>
 	</bean>
+	<!--===============================================================-->
 		<!--配置批量的sqlSession -->
 	<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
-	<constructor-arg name="sqlSessionFactory" ref="sqlSessionFactoryBean"></constructor-arg>
+	<constructor-arg name="sqlSessionFactory" ref="sqlSessionFactory"></constructor-arg>
 	<constructor-arg name="executorType" value="BATCH"></constructor-arg>
 	</bean>
 	<!-- 配置事务管理器 -->
 	<bean id="transactionManager"
 		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<!--控制数据源-->
 		<property name="dataSource" ref="PoolDataSource"></property>
 	</bean>
+
+	<!--开启注解事务或者使用xml配置形势的事务（主要的都是配置式）-->
 	<aop:config>
 		<!--切点表达式 -->
 		<aop:pointcut expression="execution(* com.wantao.service..*(..))"
@@ -51,11 +59,13 @@
 		<!--配置事物增强 -->
 		<aop:advisor advice-ref="txAdvice" pointcut-ref="txPointCut" />
 	</aop:config>
-	<!--配置事物增强 -->
+	<!--配置事物增强,事务如何切入-->
 	<tx:advice id="txAdvice" transaction-manager="transactionManager">
 		<tx:attributes>
+			<!--代表所有方法都是事务方法-->
 			<tx:method name="*" />
-			<tx:method name="get*" read-only="true" />
+			<tx:method name="find*" read-only="true" />
 		</tx:attributes>
 	</tx:advice>
+	<!--Spring配置文件的核心点，（数据源、与mybatis的整合、事务控制 -->
 </beans>
